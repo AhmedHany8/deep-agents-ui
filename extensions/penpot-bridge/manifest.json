@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Deep Agents Penpot Bridge",
+  "version": "0.1.0",
+  "description": "Capture Penpot iframe element info and send it to Deep Agents UI.",
+  "permissions": ["activeTab", "tabs"],
+  "host_permissions": [
+    "https://penpot.app/*",
+    "https://*.penpot.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://penpot.app/*",
+        "https://*.penpot.app/*"
+      ],
+      "js": ["content-script.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}

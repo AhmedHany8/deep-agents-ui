@@ -16,6 +16,7 @@ import {
 import { ThreadList } from "@/app/components/ThreadList";
 import { ChatProvider } from "@/providers/ChatProvider";
 import { ChatInterface } from "@/app/components/ChatInterface";
+import { SimpleBrowserPanel } from "@/app/components/SimpleBrowserPanel";
 
 interface HomePageInnerProps {
   config: StandaloneConfig;
@@ -101,6 +102,7 @@ function HomePageInner({
   useEffect(() => {
     fetchAssistant();
   }, [fetchAssistant]);
+
 
   return (
     <>
@@ -195,6 +197,17 @@ function HomePageInner({
               >
                 <ChatInterface assistant={assistant} />
               </ChatProvider>
+            </ResizablePanel>
+
+            <ResizableHandle />
+            <ResizablePanel
+              id="simple-browser"
+              order={3}
+              defaultSize={35}
+              minSize={20}
+              className="flex min-w-[340px] flex-col"
+            >
+              <SimpleBrowserPanel />
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>

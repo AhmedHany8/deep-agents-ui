@@ -5,6 +5,7 @@ import React, {
   useRef,
   useCallback,
   useMemo,
+  useEffect,
   FormEvent,
   Fragment,
 } from "react";
@@ -85,6 +86,52 @@ export const ChatInterface = React.memo<ChatInterfaceProps>(({ assistant }) => {
   } = useChatContext();
 
   const submitDisabled = isLoading || !assistant;
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+      if (data.type !== "deep-agent:element-picked") return;
+
+      const payload = data.payload ?? {};
+      const selector = payload.selector || "(unknown)";
+      const bounds = payload.bounds || {};
+      const text = payload.text || "";
+      const html = payload.html || "";
+      const styles = payload.styles || {};
+      const screenshot = payload.screenshotDataUrl || "";
+
+      const message = [
+        "### Added Element To Chat (Penpot iframe)",
+        "",
+        `- Selector: \`${selector}\``,
+        `- Bounds: x=${Math.round(bounds.x || 0)}, y=${Math.round(bounds.y || 0)}, width=${Math.round(bounds.width || 0)}, height=${Math.round(bounds.height || 0)}`,
+        `- Text: ${text ? `\`${String(text).slice(0, 300)}\`` : "(none)"}`,
+        "",
+        "#### Element HTML",
+        "```html",
+        String(html).slice(0, 8000),
+        "```",
+        "",
+        "#### Computed Style Snapshot",
+        "```json",
+        JSON.stringify(styles, null, 2),
+        "```",
+        "",
+        "#### Screenshot",
+        screenshot
+          ? `![Selected Penpot element screenshot](${screenshot})`
+          : "(screenshot unavailable)",
+      ].join("\n");
+
+      setInput((prev) => (prev.trim() ? `${prev}\n\n${message}` : message));
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
 
   const handleSubmit = useCallback(
     (e?: FormEvent) => {
@@ -514,7 +561,10 @@ export const ChatInterface = React.memo<ChatInterfaceProps>(({ assistant }) => {
               rows={1}
             />
             <div className="flex justify-between gap-2 p-3">
-              <div className="flex justify-end gap-2">
+              <div
+                className="flex w-full justify-end gap-2"
+                data-element-picker-ignore="true"
+              >
                 <Button
                   type={isLoading ? "button" : "submit"}
                   variant={isLoading ? "destructive" : "default"}
